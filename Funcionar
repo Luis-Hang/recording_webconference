@@ -1,0 +1,39 @@
+com o diretorio da pasta do projeto : node server.js https://localhost:4443 MY_SECRET
+
+Em outro terminal ligar a plataforma openvidu com o kurento : 
+
+docker run -p 4443:4443 --rm \
+    -e OPENVIDU_SECRET=MY_SECRET \
+    -e OPENVIDU_RECORDING=true \
+    -e OPENVIDU_RECORDING_PATH=/opt/openvidu/recordings \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /opt/openvidu/recordings:/opt/openvidu/recordings \
+openvidu/openvidu-server-kms:2.21.0
+
+Abrir no firefox ou chrome  :  https://localhost:5000/
+
+Copie e cole em outra aba o link, aparecerá para realizar o login, para teste utilize o usuário : OPENVIDUAPP 
+e de senha : MY_SECRET
+
+Obs. olhar o link para acessar gravação se for acessar da maneira a cima se deve olhar no app.js em stopRecording se está em localhost
+
+Para testar em dispositivos diferentes:
+
+Tem que mudar o link para a gravação no app.js em stopRecording para o IP
+
+//deu certo abaixo 
+
+docker run -p 4443:4443 --rm \
+    -e DOMAIN_OR_PUBLIC_IP=150.162.83.205 \
+    -e OPENVIDU_SECRET=MY_SECRET \
+    -e OPENVIDU_RECORDING=true \
+    -e OPENVIDU_RECORDING_PATH=/opt/openvidu/recordings \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /opt/openvidu/recordings:/opt/openvidu/recordings \
+openvidu/openvidu-server-kms:2.21.0
+
+com o diretorio da pasta do projeto : node server.js https://150.162.83.205:4443 MY_SECRET
+
+https://150.162.83.205:5000
+
+
