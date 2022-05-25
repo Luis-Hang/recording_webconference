@@ -1,12 +1,19 @@
-# Web conference with recording
+# Web conference with recording and chat
 
 ## About the project
 
-This is a video conferencing room project, here have the part of recording of meeting, can record only audio or audio and video. Given a URL with recording you can download. If chosse only audio the file is .webm and the video is .mp4. Also has the part of chat, where user can write messages for the others users. 
+This is a video conferencing room project thet uses MCU architecture, here have the part of recording of meeting, can record only audio or audio and video. Given a URL with recording you can download. If chosse only audio the file is .webm and the video is .mp4. Also has the part of chat, where user can write messages for the others users. 
 
 ## Platform
 
 Was used the OpenVidu ( https://docs.openvidu.io/en/2.21.0/ ) for build this webconference. They use kurento and WebRTC for build the MCU.
+
+## Dependecies
+
+- Body-parse
+- Express
+- Openvidu-node-client
+- Socket.io
 
 ## Installation 
 
@@ -44,3 +51,24 @@ openvidu/openvidu-server-kms:2.21.0
 ```
 
 Now open http://localhost:5000/ in a browser
+
+## About the code
+
+### Backend
+
+• server.js :
+   Where is connection betwen the app and controller to enter the OpenVidu session utilizing the token
+
+### Frontend
+
+• app.js : 
+   front-backend communication
+   
+• index.html :
+   website template
+   
+• style.css :
+   website style
+   
+• openvidu-browser-2.21.0.js :
+   openvidu-browser library, is static file.
