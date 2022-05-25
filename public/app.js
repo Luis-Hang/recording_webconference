@@ -5,76 +5,45 @@ var sessionName;
 var token;
 var numVideos = 0;
 
+var myUserName
 
 /* OPENVIDU METHODS */
 
-//const link= 'https://localhost:5000/'
-
 function joinSession() {
-//	connectSocketToSignaling()
 	
-
-//	var socket = io.connect(link,{secure:true});
-	
-	// --- 0) Change the button ---
+	myUserName = document.getElementById("userName").value;
 		
 	document.getElementById("join-btn").disabled = true;
 	document.getElementById("join-btn").innerHTML = "Entrando...";
 
 	getToken(function () {
 
-		// --- 1) Get an OpenVidu object ---
+		//  Inicia o openvidu
 
-		OV = new OpenVidu();
+		OV = new OpenVidu(); // aqui coloca configurações padrões
 
-		// --- 2) Init a session ---
+		//  começa sessão
 
 		session = OV.initSession();
 
-		// --- 3) Specify the actions when events take place in the session ---
-
-		session.on('connectionCreated', event => {
-			pushEvent(event);
-		});
-
-		session.on('connectionDestroyed', event => {
-			pushEvent(event);
-		});
-
-		// On every new Stream received...
+		// Recebe quando há uma nova stream criada
 		session.on('streamCreated', event => {
-			pushEvent(event);
-
-			// Subscribe to the Stream to receive it
-			// HTML video will be appended to element with 'video-container' id
+			
+			// Subscribe na Stream para receber
+			// Será colocado no site com ID video-container
 			var subscriber = session.subscribe(event.stream, 'video-container');
 
-			// When the HTML video has been appended to DOM...
 			subscriber.on('videoElementCreated', event => {
-				pushEvent(event);
-				// Add a new HTML element for the user's name and nickname over its video
 				updateNumVideos(1);
 			});
 
-			// When the HTML video has been appended to DOM...
 			subscriber.on('videoElementDestroyed', event => {
-				pushEvent(event);
-				// Add a new HTML element for the user's name and nickname over its video
-				updateNumVideos(-1);
+				updateNumVideos(-1);	
 			});
-
-			// When the subscriber stream has started playing media...
-			subscriber.on('streamPlaying', event => {
-				pushEvent(event);
-			});
-		});
-
-		session.on('streamDestroyed', event => {
-			pushEvent(event);
 		});
 
 		session.on('sessionDisconnected', event => {
-			pushEvent(event);
+			
 			if (event.reason !== 'disconnect') {
 				removeUser();
 			}
@@ -86,117 +55,84 @@ function joinSession() {
 			}
 		});
 
-		session.on('recordingStarted', event => {
-			pushEvent(event);
-		});
-
-		session.on('recordingStopped', event => {
-			pushEvent(event);
-		});
-
-		// On every asynchronous exception...
 		session.on('exception', (exception) => {
 			console.warn(exception);
 		});
 
-		// --- 4) Connect to the session passing the retrieved token and some more data from
-		//        the client (in this case a JSON with the nickname chosen by the user) ---
+		session.on('signal:my-chat', (event) => {
+			console.log(event.data); // mensagem
+			console.log(event.from); // Conexão para enviar
+			console.log(event.type); // Tipo ("my-chat")
+		});
+
+		session.on('colocandoUserLista', (event) =>{
+			colocaLista();
+		})
+
+		session.on('signal', (event) => {
+			var mensag = event.data.split(".././././.");
+	
+			const template = document.querySelector('template[data-template="mensagem"]');
+			const nameEl = template.content.querySelector('.mensagem__name');
+	
+			if (mensag[1] || possibleEmojis[parseInt(mensag[2])]) {
+				nameEl.innerText =  mensag[1];
+			}
+	
+			template.content.querySelector('.mensagem__bubble').innerText = mensag[0];
+			const clone = document.importNode(template.content, true);
+			const mensagemDe = clone.querySelector('.mensagem');
+	
+			if (event.from.connectionId === session.connection.connectionId) {
+				mensagemDe.classList.add('mensagem--mine');
+			  } else {
+				mensagemDe.classList.add('mensagem--theirs');
+			}
+	
+			const mensagens1 = document.querySelector('.mensagens');
+			mensagens1.appendChild(clone);
+	
+		});
+		
+
+		// Conecta a sessao utilizadno o token 
 
 		session.connect(token)
+
 			.then(() => {
 
-				// --- 5) Set page layout for active call ---
-
-				
+				// Ao ser escolhida a sessão, atualiza a pagina para a sala
 				$('#session-title').text(sessionName);
 				$('#join').hide();
+				$('#Gravando').hide();
 				$('#session').show();
-				var nome=$("#apelido").val()
-				
-				//chat
+				$('#dwn').hide();
 
-				/*
-				socket.emit("entrar", $(this).find("#apelido").val(), function(valido){ //Verifica se o usuario é valido
-					if(valido){
-						$('#session-title').text(sessionName);
-						$('#join').hide();
-						$('#session').show();        // e mostra o chat
-					}else{
-						$("#acesso_usuario").val("");
-						alert("Nome já utilizado nesta sala");
-					}
-				});
-				*/
-				//
-
-
-				// --- 6) Get your own camera stream ---
+				// Pega o video com configurações  
 
 				var publisher = OV.initPublisher('video-container', {
-					audioSource: undefined, // The source of audio. If undefined default microphone
-					videoSource: undefined, // The source of video. If undefined default webcam
-					publishAudio: true, // Whether you want to start publishing with your audio unmuted or not
-					publishVideo: true, // Whether you want to start publishing with your video enabled or not
-					resolution: '640x480', // The resolution of your video
-					frameRate: 30, // The frame rate of your video
-					insertMode: 'APPEND', // How the video is inserted in the target element 'video-container'
-					mirror: false // Whether to mirror your local video or not
+					audioSource: undefined, // Fonte de audio por padrão deixar indefinido
+					videoSource: undefined, // Fonte de video por padrão deixar indefinido
+					publishAudio: true, // Publicar com o audio ativado
+					publishVideo: true, // Publicar com o video ativado
+					resolution: '640x480', // Resolução do video
+					frameRate: 30, // Frame rate
+					insertMode: 'APPEND', // Target para adicionar na pagina 'video-container'
+					mirror: false // Para espelhar o video 
 				});
 
-				// --- 7) Specify the actions when events take place in our publisher ---
-
-				// When the publisher stream has started playing media...
-
-				/*
-				publisher.on('accessAllowed', event => {
-					pushEvent({
-						type: 'accessAllowed'
-					});
-				});
-
-				publisher.on('accessDenied', event => {
-					pushEvent(event);
-				});
-
-				publisher.on('accessDialogOpened', event => {
-					pushEvent({
-						type: 'accessDialogOpened'
-					});
-				});
-
-				publisher.on('accessDialogClosed', event => {
-					pushEvent({
-						type: 'accessDialogClosed'
-					});
-				});
-				
-
-				// When the publisher stream has started playing media...
-				publisher.on('streamCreated', event => {
-					pushEvent(event);
-				});
-				*/
-				// When our HTML video has been added to DOM...
+				// Quando o elemento do video for adicionado 
 				publisher.on('videoElementCreated', event => {
-					pushEvent(event);
 					updateNumVideos(1);
-					$(event.element).prop('muted', true); // Mute local video
+					$(event.element).prop('muted', true); // Mutar o video local
 				});
 
-				// When the HTML video has been appended to DOM...
+				// Quando sair da chamada
 				publisher.on('videoElementDestroyed', event => {
-					pushEvent(event);
-					// Add a new HTML element for the user's name and nickname over its video
 					updateNumVideos(-1);
 				});
 
-				// When the publisher stream has started playing media...
-				/*
-				publisher.on('streamPlaying', event => {
-					pushEvent(event);
-				});
-				*/
-				// --- 8) Publish your stream ---
+				// Publica a stream 
 
 				session.publish(publisher);
 				
@@ -212,34 +148,28 @@ function joinSession() {
 
 function leaveSession() {
 
-	// --- 9) Leave the session by calling 'disconnect' method over the Session object ---
+	// Sair da sessão
 	session.disconnect();
 	enableBtn();
-
 }
-
-/* OPENVIDU METHODS */
 
 function enableBtn (){
 	document.getElementById("join-btn").disabled = false;
 	document.getElementById("join-btn").innerHTML = "Entrar!";
 }
 
-/* APPLICATION REST METHODS */
-
 function getToken(callback) {
-	sessionName = $("#sessionName").val(); // Video-call chosen by the user
-
+	sessionName = $("#sessionName").val(); // Sessão escolhido pelo usuario
 	httpRequest(
 		'POST',
 		'api/get-token', {
-			sessionName: sessionName
+			sessionName: sessionName,
 		},
 		'Request of TOKEN gone WRONG:',
 		res => {
-			token = res[0]; // Get token from response
+			token = res[0]; // Pega o token da resposta
 			console.warn('Request of TOKEN gone WELL (TOKEN:' + token + ')');
-			callback(token); // Continue the join operation
+			callback(token); 
 		}
 	);
 }
@@ -353,15 +283,12 @@ function httpRequest(method, url, body, errorMsg, callback) {
 var end = ''
 
 function startRecording() {
-	$('#dwn').show();
-	//var outputMode = $('input[name=outputMode]:checked').val();
+	$('#dwn').hide();
+	$('#link').show();
+	$('#Gravando').show();
 	var outputMode = 'COMPOSED';
 	var hasAudio = $('#has-audio-checkbox').prop('checked');
-
-	// hasAudio = true;
 	var hasVideo = $('#has-video-checkbox').prop('checked');
-	//var hasVideo = false;
-
 
 	if (hasAudio == true & hasVideo ==false){
 		end = '.webm'
@@ -392,12 +319,11 @@ var n=0
 var lista_dwn = []
 
 function stopRecording() {
+	$('#Gravando').hide();
 	var forceRecordingId = document.getElementById('forceRecordingId').value;
-	//document.getElementById('link').value ="https://localhost:4443/openvidu/recordings/"+ forceRecordingId+"/"+forceRecordingId+".mp4";
-	//document.getElementById('link').value ="https://150.162.83.205:4443/openvidu/recordings/"+ forceRecordingId+"/"+forceRecordingId+".mp4";
-	
 	var url_dwn =	"https://150.162.83.205:4443/openvidu/recordings/"+ forceRecordingId+"/"+forceRecordingId+end;
-	
+	$('#dwn').hide();
+	$('#link').show();
 	
 	lista_dwn[n] = url_dwn
 	n++
@@ -405,8 +331,6 @@ function stopRecording() {
 	document.getElementById('link').value ="https://150.162.83.205:4443/openvidu/recordings/"+ forceRecordingId+"/"+forceRecordingId+end;
 	document.getElementById("buttonStartRecording").disabled = false;
 	document.getElementById("buttonStopRecording").disabled = true;
-
-//https://localhost:4443/openvidu/recordings/ses_HyCtsAsBBh/ses_HyCtsAsBBh.mp4
 
 	httpRequest(
 		'POST',
@@ -421,15 +345,14 @@ function stopRecording() {
 	);
 }
 
-
 function deleteRecording() {
 	var forceRecordingId = document.getElementById('forceRecordingId').value;
-	//document.getElementById("buttonDeleteRecording").disabled = true;
-	lista_dwn[n] = ''
 	n--
-
-	//$("#lista").remove()	
-	$('#dwn').hide();
+	lista_dwn[n] = ''
+	
+	console.log('Lista:',lista_dwn)
+	//$('#dwn').hide();
+	document.getElementById('link').value = null
 	httpRequest(
 		'DELETE',
 		'api/recording/delete', {
@@ -442,27 +365,16 @@ function deleteRecording() {
 		}
 	);
 }
-/*
-function getRecording() {
-	var forceRecordingId = document.getElementById('forceRecordingId').value;
-	httpRequest(
-		'GET',
-		'api/recording/get/' + forceRecordingId, {},
-		'Get recording WRONG',
-		res => {
-			console.log(res);
-			$('#textarea-http').text(JSON.stringify(res, null, "\t"));
-		}
-	);
-}
-*/
 
 function listRecordings() {
-	
-	//document.getElementById('link').value =lista_dwn
-//	$("#lista").remove()
+	linktodwn = $("<p class='lista' />").text("1")
+	$("#dwn").append(linktodwn)	
+	//console.log("AHH: ",document.getElementById('lista').value)
+	//document.getElementById('dwn').value = null
+	$(".lista").remove()
+
 	for (var i=0; i != n; i++){
-	linktodwn = $("<p id='lista' />").text(lista_dwn[i])
+	linktodwn = $("<p class='lista' />").text(lista_dwn[i])
 	$("#dwn").append(linktodwn)	
 	}
 	
@@ -479,15 +391,9 @@ function listRecordings() {
 	);
 }
 
-/* APPLICATION REST METHODS */
-
-
-
-/* APPLICATION BROWSER METHODS */
-
 events = '';
 
-window.onbeforeunload = function () { // Gracefully leave session
+window.onbeforeunload = function () { 
 	if (session) {
 		removeUser();
 		leaveSession();
@@ -535,62 +441,27 @@ function checkBtnsRecordings() {
 	}
 }
 
-function pushEvent(event) {
-	events += (!events ? '' : '\n') + event.type;
-	$('#textarea-events').text(events);
+function mandar_mens() {
+    var mensag = document.getElementById("texto_mensagem").value;
+    document.getElementById("texto_mensagem").value = "";
+    mensag = mensag+".././././."+myUserName+ " às " +pegarDataAtual();
+    session.signal({
+            data: mensag,
+            to: [],
+            type: 'my-chat',
+        })
+        .then(() => {
+            console.log("Mensagem enviado por ",myUserName);
+        })
+        .catch(error => {
+            console.error(error);
+        })
 }
 
-function clearHttpTextarea() {
-	$('#textarea-http').text('');
+function pegarDataAtual(){
+    var dataAtual = new Date();
+    var hora = (dataAtual.getHours()<10 ? '0' : '') + dataAtual.getHours();
+    var minuto = (dataAtual.getMinutes()<10 ? '0' : '') + dataAtual.getMinutes();
+	var dataFormatada =  hora + ":" + minuto;
+    return dataFormatada;
 }
-
-function clearEventsTextarea() {
-	$('#textarea-events').text('');
-	events = '';
-}
-
-/* APPLICATION BROWSER METHODS */
-
-/*
-
-function connectSocketToSignaling() {
-	var socket = io.connect();
-
-        $("form#chat").submit(function(e){
-            e.preventDefault();
-            socket.emit("enviar mensagem", $(this).find("#texto_mensagem").val(), function(){
-                $("form#chat #texto_mensagem").val("");
-            });
-             
-        });
-
-        socket.on("atualizar mensagens", function(mensagem){
-            var mensagem_formatada = $("<p />").text(mensagem);
-            $("#historico_mensagens").append(mensagem_formatada);
-        });
-
-        $("form#login").submit(function(e){
-            e.preventDefault();
-
-            socket.emit("entrar", $(this).find("#apelido").val(), function(valido){
-                if(valido){
-                    $("#acesso_usuario").hide();
-                    $("#sala_chat").show();
-                }else{
-                    $("#acesso_usuario").val("");
-                    alert("Nome já utilizado nesta sala");
-                }
-            });
-        });
-
-        socket.on("atualizar usuarios", function(usuarios){
-            $("#lista_usuarios").empty();
-            $("#lista_usuarios").append("<option value=''>Todos</option>");
-            $.each(usuarios, function(indice){
-                var opcao_usuario = $("<option />").text(usuarios[indice]);
-                $("#lista_usuarios").append(opcao_usuario);
-            });
-        });
-}
-
-*/

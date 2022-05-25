@@ -6985,8 +6985,25 @@ var Publisher = (function (_super) {
                 this.emitEvent('accessDenied', []);
             }
         }
+        if (type === 'newuser') {
+            if (this.newuser) {
+                this.emitEvent('newuser', []);
+            }
+        }
         return this;
     };
+
+    //novo
+    /*
+    publisher.prototype.on = function (type, handler) {
+        var _this = this;
+        _super.prototype.on.call(this, type, handler);
+        if (type === 'newuser') {
+            
+        }
+    };
+    */
+
     Publisher.prototype.once = function (type, handler) {
         var _this = this;
         _super.prototype.once.call(this, type, handler);

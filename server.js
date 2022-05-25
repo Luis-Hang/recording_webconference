@@ -1,19 +1,14 @@
-/* CONFIGURATION */
-
 var OpenVidu = require('openvidu-node-client').OpenVidu;
 var OpenViduRole = require('openvidu-node-client').OpenViduRole;
 
-// Check launch arguments: must receive openvidu-server URL and the secret
+// Recebe o URL do servidor OpenVidu e a senha
 if (process.argv.length != 4) {
     console.log("Usage: node " + __filename + " OPENVIDU_URL OPENVIDU_SECRET");
     process.exit(-1);
 }
-// For demo purposes we ignore self-signed certificate
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-
-
-// Node imports
 var express = require('express');
 
 //const server = express();
@@ -25,22 +20,22 @@ var app = express(); // Create our app with express
 
 
 
-// Server configuration
-app.use(express.static(__dirname + '/public')); // Set the static files location
+// Configuração do server
+app.use(express.static(__dirname + '/public')); 
 app.use(bodyParser.urlencoded({
     'extended': 'true'
-})); // Parse application/x-www-form-urlencoded
-app.use(bodyParser.json()); // Parse application/json
+}));
+app.use(bodyParser.json()); 
 app.use(bodyParser.json({
     type: 'application/vnd.api+json'
-})); // Parse application/vnd.api+json as json
+})); 
 
-// Listen (start app with node server.js)
+
 var options = {
     key: fs.readFileSync('openvidukey.pem'),
     cert: fs.readFileSync('openviducert.pem')
 };
-https.createServer(options, app).listen(5000);
+https.createServer(options, app).listen(3000);
 
 // Environment variable: URL where our OpenVidu server is listening
 var OPENVIDU_URL = process.argv[2];
@@ -62,15 +57,16 @@ console.log("App listening on port 5000");
 
 /* Session API */
 
-// Get token (add new user to session)
+// Pega o token da essao e coloca usuario dentro
 app.post('/api/get-token', function (req, res) {
     // The video-call to connect
     var sessionName = req.body.sessionName;
-
+    var User = req.body.User
     // Role associated to this user
     var role = OpenViduRole.PUBLISHER;
 
     console.log("Getting a token | {sessionName}={" + sessionName + "}");
+    console.log("Nome: ", User)
 
     // Build connectionProperties object with PUBLISHER role
     var connectionProperties = {
@@ -78,10 +74,10 @@ app.post('/api/get-token', function (req, res) {
     }
 
     if (mapSessions[sessionName]) {
-        // Session already exists
+        // Quando a sessão já existe
         console.log('Existing session ' + sessionName);
 
-        // Get the existing Session from the collection
+        // Pega sessão existente 
         var mySession = mapSessions[sessionName];
 
         // Generate a new Connection asynchronously with the recently created connectionProperties
@@ -142,7 +138,7 @@ function newSession(sessionName, connectionProperties, res) {
         });
 }
 
-// Remove user from session
+// Remove usuario da sessão
 app.post('/api/remove-user', function (req, res) {
     // Retrieve params from POST body
     var sessionName = req.body.sessionName;
