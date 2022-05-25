@@ -59,13 +59,16 @@ Now open http://localhost:5000/ in a browser
 • server.js :
    Where is connection betwen the app and controller to enter the OpenVidu session utilizing the token
 
-### frontend
+### Frontend
 
 • app.js : 
    front-backend communication
+   
 • index.html :
    website template
+   
 • style.css :
    website style
-• openvidu-browser-2.21.0.js 
+   
+• openvidu-browser-2.21.0.js :
    openvidu-browser library, is static file.
