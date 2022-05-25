@@ -1,14 +1,46 @@
-[![License badge](https://img.shields.io/badge/license-Apache2-orange.svg)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Documentation Status](https://readthedocs.org/projects/openvidu/badge/?version=stable)](https://docs.openvidu.io/en/stable/?badge=stable)
-[![Docker badge](https://img.shields.io/docker/pulls/openvidu/openvidu-server-kms.svg)](https://hub.docker.com/r/openvidu/openvidu-server-kms)
-[![Support badge](https://img.shields.io/badge/support-sof-yellowgreen.svg)](https://openvidu.discourse.group/)
+# Web conference with recording
 
-[![][OpenViduLogo]](http://openvidu.io)
+## About the project
 
-openvidu-recording-node
-===
+This is one the parts of a video conferencing room project, here have the part of recording of meeting, can record only audio or audio and video. Given a URL with recording you can download. If chosse only audio the file is .webm and the video is .mp4
 
-Visit [docs.openvidu.io/en/stable/tutorials/openvidu-recording-node/](http://docs.openvidu.io/en/stable/tutorials/openvidu-recording-node/)
+## Platform
 
-[OpenViduLogo]: https://secure.gravatar.com/avatar/5daba1d43042f2e4e85849733c8e5702?s=120
-# recording_webconference
+Was used the OpenVidu ( https://docs.openvidu.io/en/2.21.0/ ) for build this webconference. They use kurento and WebRTC for build the MCU.
+
+## Installation 
+
+To run need node, npm and Docker
+
+Clone the project:
+
+Copy: https://github.com/Luis-Hang/recording_webconference
+
+1. Open terminal
+2. Change the current working directory to the location where you want to have the cloned directory
+3. Type git clone and paste the URL you copied earlier:
+```bash
+git clone https://github.com/Luis-Hang/recording_webconference
+```
+4. Check if you have node and npm
+```bash
+node -v
+npm -v
+```
+5. In terminal of the project will intall npm and run
+```bash
+npm install
+node server.js https://localhost:4443 MY_SECRET
+```
+5. In other terminal will execute
+```bash
+docker run -p 4443:4443 --rm \
+    -e OPENVIDU_SECRET=MY_SECRET \
+    -e OPENVIDU_RECORDING=true \
+    -e OPENVIDU_RECORDING_PATH=/opt/openvidu/recordings \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /opt/openvidu/recordings:/opt/openvidu/recordings \
+openvidu/openvidu-server-kms:2.21.0
+```
+
+Now open http://localhost:5000/ in a browser
