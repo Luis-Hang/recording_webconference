@@ -2,11 +2,18 @@
 
 ## About the project
 
-This is a video conferencing room project, here have the part of recording of meeting, can record only audio or audio and video. Given a URL with recording you can download. If chosse only audio the file is .webm and the video is .mp4. Also has the part of chat, where user can write messages for the others users. 
+This is a video conferencing room project thet uses MCU architecture, here have the part of recording of meeting, can record only audio or audio and video. Given a URL with recording you can download. If chosse only audio the file is .webm and the video is .mp4. Also has the part of chat, where user can write messages for the others users. 
 
 ## Platform
 
 Was used the OpenVidu ( https://docs.openvidu.io/en/2.21.0/ ) for build this webconference. They use kurento and WebRTC for build the MCU.
+
+## Dependecies
+
+- Body-parse
+- Express
+- Openvidu-node-client
+- Socket.io
 
 ## Installation 
 
