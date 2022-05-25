@@ -2,7 +2,7 @@
 
 ## About the project
 
-This is one the parts of a video conferencing room project, here have the part of recording of meeting, can record only audio or audio and video. Given a URL with recording you can download. If chosse only audio the file is .webm and the video is .mp4
+This is a video conferencing room project, here have the part of recording of meeting, can record only audio or audio and video. Given a URL with recording you can download. If chosse only audio the file is .webm and the video is .mp4. Also has the part of chat, where user can write messages for the others users. 
 
 ## Platform
 
