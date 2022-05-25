@@ -1,4 +1,4 @@
-# Web conference with recording
+# Web conference with recording and chat
 
 ## About the project
 
