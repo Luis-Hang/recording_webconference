@@ -369,7 +369,6 @@ function deleteRecording() {
 function listRecordings() {
 	linktodwn = $("<p class='lista' />").text("1")
 	$("#dwn").append(linktodwn)	
-	//document.getElementById('dwn').value = null
 	$(".lista").remove()
 
 	for (var i=0; i != n; i++){
